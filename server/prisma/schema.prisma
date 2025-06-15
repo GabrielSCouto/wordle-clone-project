@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  // O Prisma vai criar um arquivo de banco de dados aqui
+  url      = env("DATABASE_URL") 
+}
+
+// Tabela para guardar os usuários
+model User {
+  id        String    @id @default(cuid()) // ID único (ex: cln2p2qjk00003b6khe7o532a)
+  email     String    @unique // Email deve ser único
+  name      String
+  passwordHash String    // nao guardar em texto plano
+  matches   Match[] // Um usuário pode ter muitas partidas
+}
+
+// Tabela para guardar as palavras do jogo
+model Word {
+  id        Int       @id @default(autoincrement())
+  text      String    @unique // A palavra de 5 letras
+  matches   Match[] // Uma palavra pode ser jogada em muitas partidas
+}
+
+// Tabela para guardar o resultado de cada jogo
+model Match {
+  id            String   @id @default(cuid())
+  date          DateTime @default(now()) // Data em que a partida foi jogada
+  wins          Boolean
+  attempts      Int      // Quantas tentativas levou (1 a 6)
+
+  // Relacionamento com Usuario
+  userId     String
+  user      User @relation(fields: [userId], references: [id])
+
+  // Relacionamento com Word
+  wordId     Int
+  word       Word @relation(fields: [wordId], references: [id])
+}
