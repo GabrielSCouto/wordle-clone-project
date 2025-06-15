@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es2021", /* Versão do JavaScript que será gerada */
+        "module": "commonjs", /* Sistema de módulos a ser usado */
+        "rootDir": "./src", /* Onde fica nosso código TypeScript */
+        "outDir": "./dist", /* Onde o JavaScript compilado será salvo */
+        "esModuleInterop": true, /* Permite melhor compatibilidade entre módulos */
+        "forceConsistentCasingInFileNames": true, /* Garante que os nomes de arquivos sejam consistentes */
+        "strict": true, /* Habilita todas as checagens de tipo estritas */
+        "skipLibCheck": true /* Pula a verificação de tipos de arquivos de declaração */
+    },
+    "include": [
+        "src/**/*"
+    ] /* Quais pastas devem ser incluídas na compilação */
+}
