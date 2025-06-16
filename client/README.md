@@ -1,5 +1,9 @@
-# React + TypeScript + Vite
+# Projetinho do Termo
 
+Projeto Vite + React + TypeScript que traz um clone do popular jogo Termo (Wordle).
+
+
+<!-- # React + TypeScript + Vite
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
@@ -51,4 +55,4 @@ export default tseslint.config({
     ...reactDom.configs.recommended.rules,
   },
 })
-```
+``` -->
