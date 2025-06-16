@@ -2,6 +2,7 @@
 
 Projeto Vite + React + TypeScript que traz um clone do popular jogo Termo (Wordle).
 
+O projeto busca apronfundar os conhecimentos nas tecnologias citadas e desafiar os limites pessoais dos colaboradores.
 
 <!-- # React + TypeScript + Vite
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
