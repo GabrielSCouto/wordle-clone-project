@@ -1,0 +1,51 @@
+// client/src/pages/LoginPage.tsx
+import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
+
+export default function LoginPage() {
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
+    const [nome, setNome] = useState(''); // Para o cadastro
+    const [isRegistering, setIsRegistering] = useState(false);
+    const { login } = useAuth();
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            if (isRegistering) {
+                // Lógica de Cadastro
+                await api.post('/users/register', { nome, email, senha });
+                alert('Cadastro realizado com sucesso! Faça o login.');
+                setIsRegistering(false); // Volta para a tela de login
+            } else {
+                // Lógica de Login
+                const response = await api.post('/users/login', { email, senha });
+                login(response.data.token); // Salva o token no contexto
+                navigate('/'); // Redireciona para o jogo
+            }
+        } catch (error) {
+            alert('Falha na operação. Verifique seus dados.');
+            console.error(error);
+        }
+    };
+
+    // O return aqui teria o formulário JSX com os inputs
+    // e um botão para alternar entre `isRegistering`
+    return (
+        <form onSubmit={handleSubmit}>
+            <h2>{isRegistering ? 'Cadastro' : 'Login'}</h2>
+            {isRegistering && (
+                <input type="text" placeholder="Nome" value={nome} onChange={e => setNome(e.target.value)} required />
+            )}
+            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+            <input type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} required />
+            <button type="submit">{isRegistering ? 'Cadastrar' : 'Entrar'}</button>
+            <p onClick={() => setIsRegistering(!isRegistering)} style={{ cursor: 'pointer', color: 'blue' }}>
+                {isRegistering ? 'Já tem uma conta? Faça login' : 'Não tem uma conta? Cadastre-se'}
+            </p>
+        </form>
+    );
+}

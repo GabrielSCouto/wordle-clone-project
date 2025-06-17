@@ -1,31 +1,24 @@
 import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
+import { Routes, Route } from 'react-router-dom';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import GamePage from './pages/GamePage';
+import LoginPage from './pages/LoginPage';
+import ProfilePage from './pages/ProfilePage';
+
 function App() {
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    // Busca dados da nossa API no back-end
-    fetch('http://localhost:3001/api/healthcheck')
-      .then(response => response.json())
-      .then(data => {
-        setMessage(data.message);
-      })
-      .catch(error => {
-        console.error('Erro ao buscar dados:', error);
-        setMessage('Não foi possível conectar à API.');
-      });
-  }, []); // O array vazio [] faz com que isso rode apenas uma vez
-
   return (
-    <div className="App">
-      <h1>Clone do Termo</h1>
-      <p>
-        Status da API: <strong>{message}</strong>
-      </p>
-    </div>
+    <Routes>
+      {/* Rotas Públicas */}
+      <Route path="/login" element={<LoginPage />} />
+
+      {/* Rotas Protegidas */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<GamePage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+      </Route>
+    </Routes>
   );
 }
 
