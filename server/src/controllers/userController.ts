@@ -33,4 +33,16 @@ export class UserController {
             return res.status(401).json({ message: error.message }); // 401 Unauthorized é mais apropriado
         }
     }
+
+    async getProfile(req: Request, res: Response): Promise<any> {
+        // O userId é adicionado à requisição pelo nosso authMiddleware
+        const userId = req.userId;
+
+        try {
+            const profile = await userService.getUserProfile(userId);
+            return res.status(200).json(profile);
+        } catch (error: any) {
+            return res.status(404).json({ message: error.message });
+        }
+    }
 }

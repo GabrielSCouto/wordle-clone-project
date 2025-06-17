@@ -61,7 +61,7 @@ export class UserService {
         const token = sign(
             {
                 // Informações que queremos guardar no token (payload)
-                nome: user.name,
+                name: user.name,
             },
             process.env.JWT_SECRET as string, // A senha secreta do .env
             {
@@ -73,4 +73,46 @@ export class UserService {
         // 4. RETORNAR O TOKEN
         return { token };
     }
+
+    async getUserProfile(userId: string) {
+        // Busca o usuário e INCLUI todas as partidas e as palavras relacionadas
+        const userProfile = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+                matches: {
+                    // Inclui a palavra de cada partida para podermos exibi-la
+                    include: {
+                        word: true,
+                    },
+                    // Ordena as partidas da mais recente para a mais antiga
+                    orderBy: {
+                        date: 'desc',
+                    },
+                },
+            },
+        });
+
+        if (!userProfile) {
+            throw new Error('Usuário não encontrado.');
+        }
+
+        // Vamos calcular algumas estatísticas aqui mesmo no back-end
+        const totalMatches = userProfile.matches.length;
+        const matchWins = userProfile.matches.filter(p => p.wins).length;
+        const winRate = totalMatches > 0 ? (matchWins / totalMatches) * 100 : 0;
+
+        // Removemos o hash da senha antes de enviar os dados
+        const { passwordHash: _, ...profileData } = userProfile;
+
+        return {
+            ...profileData,
+            stats: {
+                totalMatches,
+                matchWins,
+                winRate: winRate.toFixed(2) + '%', // Formata como porcentagem
+            }
+        };
+    }
+
+
 }
