@@ -1,7 +1,7 @@
 // server/src/services/userService.ts
 import { hash } from 'bcryptjs';
 import { prisma } from '../lib/prisma';
-import { UserCreateData } from '../types/userTypes';
+import { UserCreateData, UserUpdateData } from '../types/userTypes';
 import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 
@@ -18,7 +18,7 @@ export class UserService {
             throw new Error('Este e-mail já está em uso.');
         }
 
-        // 2. CRIPTOGRAFAR A SENHA
+        // 2. CRIPTOGRAFApassword
         // O segundo argumento é o "salt", a complexidade da criptografia. 8 é um bom valor.
         const passwordHash = await hash(password, 8);
 
@@ -27,7 +27,7 @@ export class UserService {
             data: {
                 name,
                 email,
-                passwordHash, // Salvamos a senha criptografada
+                passwordHash, // Salvamopassword criptografada
             },
         });
 
@@ -115,4 +115,53 @@ export class UserService {
     }
 
 
+    async updateUser(userId: string, data: UserUpdateData) {
+        const { name, email, password } = data;
+
+        // 1. VERIFICA SE O NOVO E-MAIL JÁ ESTÁ EM USO
+        if (email) {
+            const emailInUse = await prisma.user.findFirst({
+                where: {
+                    email: email,
+                    id: {
+                        not: userId,
+                    },
+                },
+            });
+
+            if (emailInUse) {
+                throw new Error('Email já em uso.');
+            }
+        }
+
+        // --- CORREÇÃO PRINCIPAL AQUI ---
+
+        // 2. PREPARA O OBJETO DE ATUALIZAÇÃO PARA O PRISMA
+        // Este objeto deve ter chaves que correspondem EXATAMENTE ao seu schema.prisma
+        const dataToUpdate: {
+            name?: string;
+            email?: string;
+            passwordHash?: string; // A chave aqui é passwordHash
+        } = {};
+
+        if (name) dataToUpdate.name = name;
+        if (email) dataToUpdate.email = email;
+
+        // 3. CRIPTOGRAFA A NOVA SENHA, SE ELA FOI FORNECIDA
+        if (password && password.trim() !== '') {
+            // Criptografa a senha em texto puro recebida no 'password'
+            const hashedPassword = await hash(password, 8);
+            // Atribui a senha JÁ CRIPTOGRAFADA à chave 'passwordHash'
+            dataToUpdate.passwordHash = hashedPassword;
+        }
+
+        // 4. ATUALIZA O USUÁRIO NO BANCO COM O OBJETO CORRETO
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: dataToUpdate, // Passa o objeto com as chaves corretas (name, email, passwordHash)
+        });
+
+        const { passwordHash: _, ...userWithoutPassword } = updatedUser;
+        return userWithoutPassword;
+    }
 }

@@ -10,5 +10,7 @@ const userController = new UserController();
 userRoutes.post('/register', userController.register);
 userRoutes.post('/login', userController.login);
 userRoutes.get('/profile', authMiddleware, (req, res) => userController.getProfile(req, res));
+userRoutes.put('/profile/update', authMiddleware, (req, res) => userController.updateProfile(req, res));
+
 
 export default userRoutes;

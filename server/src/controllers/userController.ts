@@ -45,4 +45,17 @@ export class UserController {
             return res.status(404).json({ message: error.message });
         }
     }
+
+    async updateProfile(req: Request, res: Response): Promise<any> {
+        const userId = req.userId; // Pego do middleware
+        const { name, email, password } = req.body; // Pego do corpo da requisição
+
+        try {
+            const updatedUser = await userService.updateUser(userId, { name, email, password });
+            return res.status(200).json(updatedUser);
+        } catch (error: any) {
+            return res.status(400).json({ message: error.message });
+        }
+    }
+
 }
