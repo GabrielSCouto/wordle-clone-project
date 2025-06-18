@@ -2,45 +2,79 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import Grid from '../components/game/Grid.tsx'; 
+import Grid from '../components/game/Grid.tsx';
+import GameEndNotification from '../components/game/GameEndNotification.tsx';
 
 const MAX_ATTEMPTS = 6;
 const WORD_LENGTH = 5;
 
 export default function GamePage() {
     const [matchWord, setMatchWord] = useState('');
-    // --- NOVOS ESTADOS PARA A GRID ---
     const [guesses, setGuesses] = useState<string[]>(Array(MAX_ATTEMPTS).fill('')); // Array para as attempts
     const [currentAttempt, setCurrentAttempt] = useState(0); // Tentativa atual (0-5)
     const [currentGuess, setCurrentGuess] = useState(''); // O que está sendo digitado
     const [isGameOver, setIsGameOver] = useState(false); // Trava o teclado no fim do jogo
 
+    // --- 2. NOVO ESTADO PARA CONTROLAR A NOTIFICAÇÃO ---
+    const [gameResult, setGameResult] = useState<{ show: boolean; won: boolean }>({
+        show: false,
+        won: false,
+    });
+
     const { logout } = useAuth();
     const navigate = useNavigate();
 
     // Busca a palavra quando a página carrega
-    useEffect(() => {
-        const fetchWord = async () => {
-            try {
-                const response = await api.get('/game/start');
-                setMatchWord(response.data.word.toUpperCase());
-            } catch (error) { console.error('Erro ao buscar palavra do jogo', error); }
-        };
-        fetchWord();
+    // useEffect(() => {
+    //     const fetchWord = async () => {
+    //         try {
+    //             const response = await api.get('/game/start');
+    //             setMatchWord(response.data.word.toUpperCase());
+    //         } catch (error) { console.error('Erro ao buscar palavra do jogo', error); }
+    //     };
+    //     fetchWord();
+    // }, []);
+    const fetchWord = useCallback(async () => {
+        try {
+            const response = await api.get('/game/start');
+            setMatchWord(response.data.word.toUpperCase());
+        } catch (error) { console.error('Erro ao buscar palavra do jogo', error); }
     }, []);
+    useEffect(() => {
+        fetchWord();
+    }, [fetchWord]);
 
+    // Função para resetar o jogo
+    const resetGame = () => {
+        setGuesses(Array(MAX_ATTEMPTS).fill(''));
+        setCurrentAttempt(0);
+        setCurrentGuess('');
+        setIsGameOver(false);
+        setGameResult({ show: false, won: false });
+        fetchWord(); // Busca uma nova palavra
+    };
     // Função a ser chamada quando o jogo terminar
+    // const handleGameEnd = useCallback(async (wins: boolean, attempts: number) => {
+    //     setIsGameOver(true);
+    //     setTimeout(async () => {
+    //         try {
+    //             await api.post('/game/save', { wins, attempts, wordText: matchWord });
+    //             alert(wins ? 'Parabéns, você wins!' : `Você perdeu! A palavra era ${matchWord}`);
+    //             // Opcional: navegar para o perfil após o jogo
+    //             navigate('/profile');
+    //         } catch (error) { console.error('Erro ao salvar o jogo', error); }
+    //     }, 1000); // Um pequeno delay para o usuário ver o resultado
+    // }, [matchWord, navigate]);
+
     const handleGameEnd = useCallback(async (wins: boolean, attempts: number) => {
         setIsGameOver(true);
-        setTimeout(async () => {
-            try {
-                await api.post('/game/save', { wins, attempts, wordText: matchWord });
-                alert(wins ? 'Parabéns, você venceu!' : `Você perdeu! A palavra era ${matchWord}`);
-                // Opcional: navegar para o perfil após o jogo
-                navigate('/profile');
-            } catch (error) { console.error('Erro ao salvar o jogo', error); }
-        }, 1000); // Um pequeno delay para o usuário ver o resultado
-    }, [matchWord, navigate]);
+        // Salva o resultado no backend sem esperar
+        api.post('/game/save', { wins, attempts, wordText: matchWord })
+            .catch(error => console.error('Erro ao salvar o jogo', error));
+
+        // Apenas mostra a notificação, sem usar alert() ou setTimeout
+        setGameResult({ show: true, won: wins });
+    }, [matchWord]);
 
     // --- LÓGICA PARA CAPTURAR O TECLADO ---
     const handleKeyDown = useCallback((event: KeyboardEvent) => {
@@ -83,7 +117,7 @@ export default function GamePage() {
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', borderBottom: '1px solid #ccc' }}>
 
                 <div style={{ width: '100px' }}></div>
-                <h1 style = {{textAlign: 'center'}}>LETRA</h1>
+                <h1 style={{ textAlign: 'center' }}>LETRA</h1>
                 <div style={{ width: '100px' }}></div>
             </header>
             <footer>
@@ -100,6 +134,15 @@ export default function GamePage() {
                     wordToGuess={matchWord}
                 />
             </main>
+
+            {/* --- 4. RENDERIZA A NOTIFICAÇÃO AQUI --- */}
+            <GameEndNotification
+                isOpen={gameResult.show}
+                didWin={gameResult.won}
+                correctWord={matchWord}
+                onPlayAgain={resetGame}
+                onNavigateToProfile={() => navigate('/profile')}
+            />
         </div>
     );
 }
