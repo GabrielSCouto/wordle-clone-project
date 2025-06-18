@@ -8,6 +8,8 @@
 *Um clone funcional do popular jogo de palavras Termo/Wordle, desenvolvido como uma aplicação web completa com front-end, back-end e banco de dados relacional.*
 
 *Por Gabriel Campos e Gabriel Couto*
+
+<img src="page_preview.png" alt="page preview">
 ---
 
 ## 📋 Índice
