@@ -2,7 +2,7 @@
     display: grid;
     grid-template-rows: repeat(6, 1fr);
     grid-gap: 5px;
-    padding: 10px;
+    padding: 45px;
     box-sizing: border-box;
 }
 
@@ -18,13 +18,14 @@
     border: 2px solid #d3d6da;
     font-size: 2rem;
     font-weight: bold;
-    color: black;
+    color: white;
     text-transform: uppercase;
     display: flex;
     justify-content: center;
     align-items: center;
     user-select: none;
     transition: all 0.2s ease;
+    ;
 }
 
 /* Estilos baseados no status da célula */

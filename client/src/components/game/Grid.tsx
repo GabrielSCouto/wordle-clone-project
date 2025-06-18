@@ -1,22 +1,33 @@
 import Row from './row.tsx';
 
 interface GridProps {
-    guesses: string[]; // Array com todas as tentativas (ex: ["SONHO", "LIVRO"])
-    currentAttempt: number; // O índice da tentativa atual (0 a 5)
-    currentGuess: string; // A palavra que o usuário está digitando
+    guesses: string[]; 
+    currentAttempt: number; 
+    currentGuess: string; 
     wordToGuess: string;
 }
 
 export default function Grid({ guesses, currentAttempt, currentGuess, wordToGuess }: GridProps) {
+    // Criamos um array de 6 posições para garantir que sempre teremos 6 linhas
+    const allRows = Array.from({ length: 6 });
+
     return (
         <div className="grid">
-            {guesses.map((guess, i) => {
-                if (i === currentAttempt) {
-                    // Renderiza a linha que está sendo digitada
-                    return <Row key={i} guess={currentGuess} wordToGuess={wordToGuess} isCompleted={false} />;
-                }
-                // Renderiza as linhas já completadas
-                return <Row key={i} guess={guess} wordToGuess={wordToGuess} isCompleted={true} />;
+            {allRows.map((_, i) => {
+                // Determina o estado de cada linha no loop
+                const isCurrentAttempt = i === currentAttempt;
+                const isCompleted = i < currentAttempt;
+
+                return (
+                    <Row
+                        key={i}
+                        // Se for a tentativa atual, usamos o currentGuess, senão usamos a tentativa passada
+                        guess={isCurrentAttempt ? currentGuess : guesses[i] || ''}
+                        wordToGuess={wordToGuess}
+                        
+                        isCompleted={isCompleted}
+                    />
+                );
             })}
         </div>
     );
