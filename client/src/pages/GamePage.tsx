@@ -83,7 +83,7 @@ export default function GamePage() {
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', borderBottom: '1px solid #ccc' }}>
 
                 <div style={{ width: '100px' }}></div>
-                <h1 style = {{textAlign: 'center'}}>TREMO</h1>
+                <h1 style = {{textAlign: 'center'}}>LETRA</h1>
                 <div style={{ width: '100px' }}></div>
             </header>
             <footer>

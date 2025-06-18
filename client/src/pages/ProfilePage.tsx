@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ProfileData {
     UserId: string;
-    name: string; // <-- MUDANÇA
+    name: string;
     email: string;
     stats: {
         totalMatches: number;
@@ -31,14 +32,19 @@ export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
 
+
+    const { logout } = useAuth(); 
+    const navigate = useNavigate();
+
+
     const fetchProfile = async () => {
         try {
             setIsLoading(true);
             const response = await api.get('/users/profile');
             setProfileData(response.data);
             setFormData({
-                name: response.data.name, 
-                email: response.data.email,  
+                name: response.data.name,
+                email: response.data.email,
                 password: '',
             });
         } catch (err) {
@@ -84,6 +90,19 @@ export default function ProfilePage() {
         }
     };
 
+    const handleDeleteAccount = async () => {
+        if (window.confirm('Tem certeza absoluta que deseja deletar sua conta? Esta ação é irreversível e todos os seus dados de jogos serão perdidos.')) {
+            try {
+                await api.delete('/users/profile/delete');
+                alert('Sua conta foi deletada com sucesso.');
+                logout();
+                navigate('/login');
+            } catch (err: any) {
+                alert(`Erro ao deletar a conta: ${err.response?.data?.message || 'Tente novamente.'}`);
+            }
+        }
+    };
+
     if (isLoading) return <div>Carregando perfil...</div>;
     if (error) return <div>{error}</div>;
     if (!profileData) return <div>Nenhum dado encontrado.</div>;
@@ -91,11 +110,12 @@ export default function ProfilePage() {
     return (
         <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '600px', margin: 'auto' }}>
             <Link to="/">Voltar para o Jogo</Link>
-            <h1>Perfil de {profileData.name}</h1> 
+            <h1>Perfil de {profileData.name}</h1>
 
             {isEditing ? (
                 // MODO DE EDIÇÃO
-                <form onSubmit={handleUpdateSubmit}>
+                <div>
+                <form onSubmit={handleUpdateSubmit} style={{ borderBottom: '2px solid red', paddingBottom: '20px', marginBottom: '20px' }}>
                     <h3>Editando Perfil</h3>
                     <div>
                         <label>Name:</label>
@@ -112,35 +132,48 @@ export default function ProfilePage() {
                     <button type="submit">Salvar Alterações</button>
                     <button type="button" onClick={() => setIsEditing(false)}>Cancelar</button>
                 </form>
+
+                {/* --- SEÇÃO DE PERIGO COM O BOTÃO DE DELEÇÃO --- */}
+            <div>
+                <h3>Deletar Conta</h3>
+                <p>Esta ação não pode ser desfeita.</p>
+                <button
+                    onClick={handleDeleteAccount}
+                    style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '10px' }}
+                >
+                    Deletar minha conta permanentemente
+                </button>
+            </div>
+            </div>
             ) : (
-                // MODO DE VISUALIZAÇÃO
-                <>
-                    <p>Email: {profileData.email}</p>
-                    <button onClick={() => setIsEditing(true)}>Editar Perfil</button>
+            // MODO DE VISUALIZAÇÃO
+            <>
+                <p>Email: {profileData.email}</p>
+                <button onClick={() => setIsEditing(true)}>Editar Perfil</button>
 
-                    <div style={{ border: '1px solid #ccc', padding: '10px', margin: '20px 0' }}>
-                        <h2>Estatísticas</h2>
-                        <p><strong>Total de Jogos:</strong> {profileData.stats.totalMatches}</p>
-                        <p><strong>Vitórias:</strong> {profileData.stats.matchWins}</p>
-                        <p><strong>Taxa de Sucesso:</strong> {profileData.stats.winRate}</p>
-                    </div>
+                <div style={{ border: '1px solid #ccc', padding: '10px', margin: '20px 0' }}>
+                    <h2>Estatísticas</h2>
+                    <p><strong>Total de Jogos:</strong> {profileData.stats.totalMatches}</p>
+                    <p><strong>Vitórias:</strong> {profileData.stats.matchWins}</p>
+                    <p><strong>Taxa de Sucesso:</strong> {profileData.stats.winRate}</p>
+                </div>
 
-                    <h2>Histórico de Partidas</h2>
-                    {profileData.matches.length > 0 ? (
-                        <ul style={{ listStyle: 'none', padding: 0 }}>
-                            {profileData.matches.map((match) => (
-                                <li key={match.matchId} style={{ border: '1px solid #eee', padding: '10px', marginBottom: '10px' }}>
-                                    <strong>Palavra:</strong> {match.word.text} <br />
-                                    <strong>Resultado:</strong> {match.wins ? '🏆 Vitória' : '❌ Derrota'} <br />
-                                    <strong>Tentativas:</strong> {match.attempts} <br />
-                                    <strong>Data:</strong> {new Date(match.date).toLocaleDateString('pt-BR')}
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>Você ainda não jogou nenhuma partida.</p>
-                    )}
-                </>
+                <h2>Histórico de Partidas</h2>
+                {profileData.matches.length > 0 ? (
+                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                        {profileData.matches.map((match) => (
+                            <li key={match.matchId} style={{ border: '1px solid #eee', padding: '10px', marginBottom: '10px' }}>
+                                <strong>Palavra:</strong> {match.word.text} <br />
+                                <strong>Resultado:</strong> {match.wins ? '🏆 Vitória' : '❌ Derrota'} <br />
+                                <strong>Tentativas:</strong> {match.attempts} <br />
+                                <strong>Data:</strong> {new Date(match.date).toLocaleDateString('pt-BR')}
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>Você ainda não jogou nenhuma partida.</p>
+                )}
+            </>
             )}
         </div>
     );
