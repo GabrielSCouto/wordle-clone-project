@@ -14,12 +14,9 @@ export class UserService {
         });
 
         if (userAlreadyExists) {
-            // Lançar um erro é uma boa prática, o controller vai capturá-lo
             throw new Error('Este e-mail já está em uso.');
         }
 
-        // 2. CRIPTOGRAFApassword
-        // O segundo argumento é o "salt", a complexidade da criptografia. 8 é um bom valor.
         const passwordHash = await hash(password, 8);
 
         // 3. SALVAR NO BANCO DE DADOS
@@ -27,12 +24,12 @@ export class UserService {
             data: {
                 name,
                 email,
-                passwordHash, // Salvamopassword criptografada
+                passwordHash, 
             },
         });
 
-        // 4. RETORNAR O USUÁRIO CRIADO (SEM A SENHA)
-        // É uma boa prática de segurança nunca retornar o hash da senha
+        
+        //nunca retornar o hash da senha
         const { passwordHash: _, ...userWithoutPassword } = user;
 
         return userWithoutPassword;
@@ -75,7 +72,6 @@ export class UserService {
     }
 
     async getUserProfile(userId: string) {
-        // Busca o usuário e INCLUI todas as partidas e as palavras relacionadas
         const userProfile = await prisma.user.findUnique({
             where: { id: userId },
             include: {
@@ -96,12 +92,11 @@ export class UserService {
             throw new Error('Usuário não encontrado.');
         }
 
-        // Vamos calcular algumas estatísticas aqui mesmo no back-end
         const totalMatches = userProfile.matches.length;
         const matchWins = userProfile.matches.filter(p => p.wins).length;
         const winRate = totalMatches > 0 ? (matchWins / totalMatches) * 100 : 0;
 
-        // Removemos o hash da senha antes de enviar os dados
+        // Remove o hash da senha antes de enviar os dados
         const { passwordHash: _, ...profileData } = userProfile;
 
         return {
@@ -134,10 +129,7 @@ export class UserService {
             }
         }
 
-        // --- CORREÇÃO PRINCIPAL AQUI ---
 
-        // 2. PREPARA O OBJETO DE ATUALIZAÇÃO PARA O PRISMA
-        // Este objeto deve ter chaves que correspondem EXATAMENTE ao seu schema.prisma
         const dataToUpdate: {
             name?: string;
             email?: string;
@@ -158,10 +150,20 @@ export class UserService {
         // 4. ATUALIZA O USUÁRIO NO BANCO COM O OBJETO CORRETO
         const updatedUser = await prisma.user.update({
             where: { id: userId },
-            data: dataToUpdate, // Passa o objeto com as chaves corretas (name, email, passwordHash)
+            data: dataToUpdate, 
         });
 
         const { passwordHash: _, ...userWithoutPassword } = updatedUser;
         return userWithoutPassword;
+    }
+
+    async deleteUser(userId: string) {
+        await prisma.user.delete({
+            where: {
+                id: userId,
+            },
+        });
+
+        return { message: 'Usuário deletado com sucesso.' };
     }
 }

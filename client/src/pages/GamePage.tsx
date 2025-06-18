@@ -1,9 +1,8 @@
-// client/src/pages/GamePage.tsx
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import Grid from '../components/game/Grid.tsx'; // <-- Importa a grid
+import Grid from '../components/game/Grid.tsx'; 
 
 const MAX_ATTEMPTS = 6;
 const WORD_LENGTH = 5;
@@ -82,9 +81,9 @@ export default function GamePage() {
     return (
         <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto', display: 'flex', flexDirection: 'column', height: '100vh' }}>
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', borderBottom: '1px solid #ccc' }}>
-            
+
+                <div style={{ width: '100px' }}></div>
                 <h1 style = {{textAlign: 'center'}}>TREMO</h1>
-                {/* Espaço para manter o título centralizado */}
                 <div style={{ width: '100px' }}></div>
             </header>
             <footer>

@@ -36,7 +36,7 @@ model Match {
 
   // Relacionamento com Usuario
   userId     String
-  user      User @relation(fields: [userId], references: [id])
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Relacionamento com Word
   wordId     Int

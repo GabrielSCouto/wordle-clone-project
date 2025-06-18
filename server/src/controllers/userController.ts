@@ -58,4 +58,14 @@ export class UserController {
         }
     }
 
+    async deleteProfile(req: Request, res: Response): Promise<any> {
+        const userId = req.userId;
+        try {
+            const result = await userService.deleteUser(userId);
+            return res.status(200).json(result);
+        } catch (error: any) {
+            return res.status(404).json({ message: 'Usuário não encontrado ou erro ao deletar.' });
+        }
+    }
+
 }
