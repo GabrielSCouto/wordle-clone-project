@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import Grid from '../components/game/grid'; // <-- Importa a grid
+import Grid from '../components/game/Grid.tsx'; // <-- Importa a grid
 
 const MAX_ATTEMPTS = 6;
 const WORD_LENGTH = 5;
