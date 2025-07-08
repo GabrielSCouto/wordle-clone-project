@@ -12,23 +12,22 @@ const getStatuses = (guess: string, wordToGuess: string) => {
     const solutionChars = wordToGuess.split('');
     const statuses: ('correct' | 'present' | 'absent')[] = [];
 
-    // 1ª Passada: Encontrar as letras 'correct' (verdes)
+    // Encontrar as letras 'correct' (verdes)
     guessChars.forEach((letter, i) => {
         if (solutionChars[i] === letter) {
             statuses[i] = 'correct';
-            solutionChars[i] = ''; // "Usa" a letra da solução para não ser reutilizada
+            solutionChars[i] = ''; 
         }
     });
 
-    // 2ª Passada: Encontrar as letras 'present' (amarelas) e 'absent' (cinzas)
+    //Encontrar as letras 'present' (amarelas) e 'absent' (cinzas)
     guessChars.forEach((letter, i) => {
-        // Se a letra já foi marcada como 'correct', pula para a próxima
         if (statuses[i]) return;
 
         const indexOfPresentChar = solutionChars.indexOf(letter);
         if (indexOfPresentChar !== -1) {
             statuses[i] = 'present';
-            solutionChars[indexOfPresentChar] = ''; // Usa a letra para não ser recontada
+            solutionChars[indexOfPresentChar] = ''; 
         } else {
             statuses[i] = 'absent';
         }
@@ -39,7 +38,6 @@ const getStatuses = (guess: string, wordToGuess: string) => {
 
 
 export default function Row({ guess = '', wordToGuess, isCompleted }: RowProps) {
-    // Se a linha não foi completada, todas as células estão no estado 'typing' ou 'empty'
     if (!isCompleted) {
         const letters = guess.padEnd(5, ' ').split('');
         return (

@@ -4,6 +4,8 @@ import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Grid from '../components/game/Grid.tsx';
 import GameEndNotification from '../components/game/GameEndNotification.tsx';
+import InstructionsModal from '../components/game/InstructionsModal';
+
 
 const MAX_ATTEMPTS = 6;
 const WORD_LENGTH = 5;
@@ -15,31 +17,35 @@ export default function GamePage() {
     const [currentGuess, setCurrentGuess] = useState(''); // O que está sendo digitado
     const [isGameOver, setIsGameOver] = useState(false); // Trava o teclado no fim do jogo
 
-    // --- 2. NOVO ESTADO PARA CONTROLAR A NOTIFICAÇÃO ---
+
     const [gameResult, setGameResult] = useState<{ show: boolean; won: boolean }>({
         show: false,
         won: false,
     });
 
+    const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
+
     const { logout } = useAuth();
     const navigate = useNavigate();
 
-    // Busca a palavra quando a página carrega
-    // useEffect(() => {
-    //     const fetchWord = async () => {
-    //         try {
-    //             const response = await api.get('/game/start');
-    //             setMatchWord(response.data.word.toUpperCase());
-    //         } catch (error) { console.error('Erro ao buscar palavra do jogo', error); }
-    //     };
-    //     fetchWord();
-    // }, []);
     const fetchWord = useCallback(async () => {
         try {
             const response = await api.get('/game/start');
             setMatchWord(response.data.word.toUpperCase());
         } catch (error) { console.error('Erro ao buscar palavra do jogo', error); }
     }, []);
+    useEffect(() => {
+        fetchWord();
+    }, [fetchWord]);
+
+    useEffect(() => {
+        const hasSeenInstructions = localStorage.getItem('hasSeenInstructions');
+        if (!hasSeenInstructions) {
+            setIsInstructionsOpen(true);
+            localStorage.setItem('hasSeenInstructions', 'true');
+        }
+    }, []);
+
     useEffect(() => {
         fetchWord();
     }, [fetchWord]);
@@ -53,18 +59,7 @@ export default function GamePage() {
         setGameResult({ show: false, won: false });
         fetchWord(); // Busca uma nova palavra
     };
-    // Função a ser chamada quando o jogo terminar
-    // const handleGameEnd = useCallback(async (wins: boolean, attempts: number) => {
-    //     setIsGameOver(true);
-    //     setTimeout(async () => {
-    //         try {
-    //             await api.post('/game/save', { wins, attempts, wordText: matchWord });
-    //             alert(wins ? 'Parabéns, você wins!' : `Você perdeu! A palavra era ${matchWord}`);
-    //             // Opcional: navegar para o perfil após o jogo
-    //             navigate('/profile');
-    //         } catch (error) { console.error('Erro ao salvar o jogo', error); }
-    //     }, 1000); // Um pequeno delay para o usuário ver o resultado
-    // }, [matchWord, navigate]);
+
 
     const handleGameEnd = useCallback(async (wins: boolean, attempts: number) => {
         setIsGameOver(true);
@@ -72,13 +67,12 @@ export default function GamePage() {
         api.post('/game/save', { wins, attempts, wordText: matchWord })
             .catch(error => console.error('Erro ao salvar o jogo', error));
 
-        // Apenas mostra a notificação, sem usar alert() ou setTimeout
         setGameResult({ show: true, won: wins });
     }, [matchWord]);
 
-    // --- LÓGICA PARA CAPTURAR O TECLADO ---
+    // --- LÓGICA DO TECLADO ---
     const handleKeyDown = useCallback((event: KeyboardEvent) => {
-        if (isGameOver) return; // Se o jogo acabou, não faz nada
+        if (isGameOver) return; // Se o jogo acabou não faz nada
 
         if (event.key === 'Enter') {
             if (currentGuess.length === WORD_LENGTH) {
@@ -104,7 +98,6 @@ export default function GamePage() {
         }
     }, [currentAttempt, currentGuess, guesses, isGameOver, handleGameEnd, matchWord]);
 
-    // Adiciona e remove o "ouvinte" de teclado
     useEffect(() => {
         window.addEventListener('keydown', handleKeyDown);
         return () => {
@@ -124,6 +117,10 @@ export default function GamePage() {
                 <nav>
                     <Link to="/profile" style={{ marginRight: '10px' }}>Ver Perfil</Link>
                     <button onClick={logout}>Sair</button>
+
+                    <button onClick={() => setIsInstructionsOpen(true)} style={{ fontSize: '1.5rem', background: 'none', border: 'none', cursor: 'pointer' }}>
+                        ?
+                    </button>
                 </nav>
             </footer>
             <main style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', flexGrow: 1 }}>
@@ -135,13 +132,17 @@ export default function GamePage() {
                 />
             </main>
 
-            {/* --- 4. RENDERIZA A NOTIFICAÇÃO AQUI --- */}
             <GameEndNotification
                 isOpen={gameResult.show}
                 didWin={gameResult.won}
                 correctWord={matchWord}
                 onPlayAgain={resetGame}
                 onNavigateToProfile={() => navigate('/profile')}
+            />
+
+            <InstructionsModal
+                isOpen={isInstructionsOpen}
+                onClose={() => setIsInstructionsOpen(false)}
             />
         </div>
     );
