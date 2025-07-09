@@ -118,8 +118,8 @@ export default function GamePage() {
                     <Link to="/profile" style={{ marginRight: '10px' }}>Ver Perfil</Link>
                     <button onClick={logout}>Sair</button>
 
-                    <button onClick={() => setIsInstructionsOpen(true)} style={{ fontSize: '1.5rem', background: 'none', border: 'none', cursor: 'pointer' }}>
-                        ?
+                    <button onClick={() => setIsInstructionsOpen(true)} style={{cursor: 'pointer', marginLeft: '10px'}}>
+                        Instruções
                     </button>
                 </nav>
             </footer>

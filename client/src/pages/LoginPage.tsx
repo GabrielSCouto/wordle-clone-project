@@ -1,4 +1,3 @@
-// client/src/pages/LoginPage.tsx
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
@@ -23,8 +22,8 @@ export default function LoginPage() {
             } else {
                 // Lógica de Login
                 const response = await api.post('/users/login', { email, password });
-                login(response.data.token); // Salva o token no contexto
-                navigate('/'); // Redireciona para o jogo
+                login(response.data.token); 
+                navigate('/'); 
             }
         } catch (error) {
             alert('Falha na operação. Verifique seus dados.');
@@ -32,8 +31,6 @@ export default function LoginPage() {
         }
     };
 
-    // O return aqui teria o formulário JSX com os inputs
-    // e um botão para alternar entre `isRegistering`
     return (
         <form onSubmit={handleSubmit}>
             <h2>{isRegistering ? 'Cadastro' : 'Login'}</h2>
