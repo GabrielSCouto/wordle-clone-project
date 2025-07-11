@@ -50,6 +50,8 @@ A aplicação replica a experiência do jogo Termo, mas a expande com funcionali
     * **Delete:** Deleção permanente da conta e de todos os dados associados (partidas).
 * **Arquitetura Robusta:** O back-end foi construído seguindo uma arquitetura em camadas (Controllers, Services, Repositories) para separação de responsabilidades e manutenibilidade.
 
+<img src="login_page_preview.png" alt="login page preview">
+
 ---
 
 ## 🛠️ Tecnologias Utilizadas
