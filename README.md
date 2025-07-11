@@ -88,7 +88,7 @@ Antes de começar, você vai precisar ter as seguintes ferramentas instaladas:
 
 1.  **Clone o repositório:**
     ```bash
-    git clone [https://github.com/GabrielSCouto/wordle-clone-project.git](https://github.com/GabrielSCouto/wordle-clone-project.git)
+    git clone https://github.com/GabrielSCouto/wordle-clone-project.git
     cd wordle-clone-project
     ```
 
